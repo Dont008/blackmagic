@@ -48,8 +48,8 @@ bool platform_buffer_write(const void *data, size_t size);
 int platform_buffer_read(void *data, size_t size);
 
 bool remote_init(bool power_up);
-bool remote_swdptap_init(void);
-bool remote_jtagtap_init(void);
+bool remote_swd_init(void);
+bool remote_jtag_init(void);
 bool remote_target_get_power(void);
 const char *remote_target_voltage(void);
 bool remote_target_set_power(bool power);
@@ -59,7 +59,7 @@ void remote_max_frequency_set(uint32_t freq);
 uint32_t remote_max_frequency_get(void);
 void remote_target_clk_output_enable(bool enable);
 
-void remote_adiv5_dp_defaults(adiv5_debug_port_s *dp);
+void remote_adiv5_dp_init(adiv5_debug_port_s *dp);
 void remote_add_jtag_dev(uint32_t dev_index, const jtag_dev_s *jtag_dev);
 
 uint64_t remote_decode_response(const char *response, size_t digits);

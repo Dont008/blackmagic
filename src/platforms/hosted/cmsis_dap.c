@@ -158,20 +158,20 @@ static void dap_hid_print_permissions(const uint16_t vid, const uint16_t pid, co
 }
 #endif
 
-static bool dap_init_hid(const bmp_info_s *const info)
+static bool dap_init_hid(void)
 {
 	DEBUG_INFO("Using hid transfer\n");
 	if (hid_init())
 		return false;
 
-	const size_t size = mbslen(info->serial);
+	const size_t size = mbslen(info.serial);
 	if (size > 64U) {
 		DEBUG_ERROR("Serial number invalid, aborting\n");
 		hid_exit();
 		return false;
 	}
 	wchar_t serial[65] = {0};
-	if (mbstowcs(serial, info->serial, size) != size) {
+	if (mbstowcs(serial, info.serial, size) != size) {
 		DEBUG_ERROR("Serial number conversion failed, aborting\n");
 		hid_exit();
 		return false;
@@ -181,15 +181,15 @@ static bool dap_init_hid(const bmp_info_s *const info)
 	 * Special-case devices that do not work with 513 byte report length
 	 * FIXME: Find a solution to decipher from the device.
 	 */
-	if (info->vid == 0x1fc9U && info->pid == 0x0132U) {
+	if (info.vid == 0x1fc9U && info.pid == 0x0132U) {
 		DEBUG_WARN("Device does not work with the normal report length, activating quirk\n");
 		report_size = 64U + 1U;
 	}
-	handle = hid_open(info->vid, info->pid, serial[0] ? serial : NULL);
+	handle = hid_open(info.vid, info.pid, serial[0] ? serial : NULL);
 	if (!handle) {
 		DEBUG_ERROR("hid_open failed: %ls\n", hid_error(NULL));
 #ifdef __linux__
-		dap_hid_print_permissions(info->vid, info->pid, serial[0] ? serial : NULL);
+		dap_hid_print_permissions(info.vid, info.pid, serial[0] ? serial : NULL);
 #endif
 		hid_exit();
 		return false;
@@ -197,34 +197,34 @@ static bool dap_init_hid(const bmp_info_s *const info)
 	return true;
 }
 
-static bool dap_init_bulk(const bmp_info_s *const info)
+static bool dap_init_bulk(void)
 {
 	DEBUG_INFO("Using bulk transfer\n");
-	int res = libusb_open(info->libusb_dev, &usb_handle);
+	int res = libusb_open(info.libusb_dev, &usb_handle);
 	if (res != LIBUSB_SUCCESS) {
 		DEBUG_ERROR("libusb_open() failed (%d): %s\n", res, libusb_error_name(res));
 		return false;
 	}
-	if (libusb_claim_interface(usb_handle, info->interface_num) < 0) {
+	if (libusb_claim_interface(usb_handle, info.interface_num) < 0) {
 		DEBUG_ERROR("libusb_claim_interface() failed\n");
 		return false;
 	}
-	in_ep = info->in_ep;
-	out_ep = info->out_ep;
+	in_ep = info.in_ep;
+	out_ep = info.out_ep;
 	return true;
 }
 
 /* LPC845 Breakout Board Rev. 0 reports an invalid response with > 65 bytes */
-bool dap_init(bmp_info_s *const info)
+bool dap_init(void)
 {
 	/* Initialise the adaptor via a suitable protocol */
-	if (info->in_ep && info->out_ep) {
+	if (info.in_ep && info.out_ep) {
 		type = CMSIS_TYPE_BULK;
-		if (!dap_init_bulk(info))
+		if (!dap_init_bulk())
 			return false;
 	} else {
 		type = CMSIS_TYPE_HID;
-		if (!dap_init_hid(info))
+		if (!dap_init_hid())
 			return false;
 	}
 
@@ -538,7 +538,7 @@ static void dap_mem_write(adiv5_access_port_s *ap, uint32_t dest, const void *sr
 	adiv5_dp_read(ap->dp, ADIV5_DP_RDBUFF);
 }
 
-void dap_adiv5_dp_defaults(adiv5_debug_port_s *target_dp)
+void dap_adiv5_dp_init(adiv5_debug_port_s *target_dp)
 {
 	/* Setup the access functions for this adaptor */
 	target_dp->ap_read = dap_ap_read;

@@ -328,17 +328,17 @@ static inline uint32_t adiv5_dp_recoverable_access(adiv5_debug_port_s *dp, uint8
 }
 
 void adiv5_dp_init(adiv5_debug_port_s *dp, uint32_t idcode);
-void platform_adiv5_dp_defaults(adiv5_debug_port_s *dp);
+void bmda_adiv5_dp_init(adiv5_debug_port_s *dp);
 adiv5_access_port_s *adiv5_new_ap(adiv5_debug_port_s *dp, uint8_t apsel);
 void remote_jtag_dev(const jtag_dev_s *jtag_dev);
 void adiv5_ap_ref(adiv5_access_port_s *ap);
 void adiv5_ap_unref(adiv5_access_port_s *ap);
-void platform_add_jtag_dev(uint32_t dev_index, const jtag_dev_s *jtag_dev);
+void bmda_add_jtag_dev(uint32_t dev_index, const jtag_dev_s *jtag_dev);
 
 void adiv5_jtag_dp_handler(uint8_t jd_index);
 #if PC_HOSTED == 1
-void platform_jtag_dp_init(adiv5_debug_port_s *dp);
-bool platform_swdptap_init(adiv5_debug_port_s *dp);
+void bmda_jtag_dp_init(adiv5_debug_port_s *dp);
+bool bmda_swd_dp_init(adiv5_debug_port_s *dp);
 #endif
 
 void adiv5_mem_write(adiv5_access_port_s *ap, uint32_t dest, const void *src, size_t len);
